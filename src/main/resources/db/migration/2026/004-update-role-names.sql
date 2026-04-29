@@ -1,0 +1,3 @@
+DELETE FROM roles WHERE name IN ('ROLE_ADMIN', 'ROLE_USER');
+
+INSERT INTO roles (name) VALUES ('ADMIN'), ('USER');
