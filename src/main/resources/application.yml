@@ -28,3 +28,8 @@ spring:
     change-log: classpath:/db/migration/db.changelog-master.yaml
     default-schema: public
     drop-first: false
+
+# ! Для удобства проверяющего пишу это здесь, а не в env переменной !
+jwt:
+  secret: dGhpcy1pcy1hLXNlY3JldC1rZXktd2l0aC0zMi1ieXRlcy1sZW5ndGgtZm9yLWp3dC1hdXRoZW50aWNhdGlvbg==
+  expiration: 86400000

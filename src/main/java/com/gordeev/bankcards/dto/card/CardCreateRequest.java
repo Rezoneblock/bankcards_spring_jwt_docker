@@ -1,4 +1,4 @@
-package com.gordeev.bankcards.dto;
+package com.gordeev.bankcards.dto.card;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

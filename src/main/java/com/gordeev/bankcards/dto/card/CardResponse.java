@@ -1,4 +1,4 @@
-package com.gordeev.bankcards.dto;
+package com.gordeev.bankcards.dto.card;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

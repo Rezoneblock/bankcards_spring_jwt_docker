@@ -1,16 +1,17 @@
-package com.gordeev.bankcards.dto;
+package com.gordeev.bankcards.dto.user;
 
-import java.time.OffsetDateTime;
+import com.gordeev.bankcards.entity.Role;
+import lombok.Builder;
+
 import java.util.Set;
 import java.util.UUID;
 
+@Builder
 public record UserResponse(
         UUID id,
         String username,
         String email,
         boolean enabled,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt,
-        Set<String> roles
+        Set<Role> roles
 ) {
 }
