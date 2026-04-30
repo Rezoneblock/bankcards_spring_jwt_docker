@@ -1,16 +1,21 @@
 package com.gordeev.bankcards.service;
 
 import com.gordeev.bankcards.dto.api.PageResponse;
+import com.gordeev.bankcards.dto.card.CardResponse;
 import com.gordeev.bankcards.dto.card.block.CardBlockDecisionRequest;
 import com.gordeev.bankcards.dto.card.block.CardBlockRequest;
 import com.gordeev.bankcards.dto.card.block.CardBlockResponse;
 import com.gordeev.bankcards.entity.Card;
 import com.gordeev.bankcards.entity.CardBlock;
+import com.gordeev.bankcards.entity.User;
 import com.gordeev.bankcards.enums.BlockRequestStatus;
 import com.gordeev.bankcards.enums.CardStatus;
+import com.gordeev.bankcards.exception.ResourceDoesNotExistException;
 import com.gordeev.bankcards.mapper.CardBlockMapper;
+import com.gordeev.bankcards.mapper.CardMapper;
 import com.gordeev.bankcards.repository.CardBlockRepository;
 import com.gordeev.bankcards.repository.CardRepository;
+import com.gordeev.bankcards.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,10 +32,18 @@ import java.util.UUID;
 @Transactional
 public class CardBlockService {
     private final CardBlockRepository cardBlockRepository;
+    private final UserRepository userRepository;
     private final CardRepository cardRepository;
     private final CardBlockMapper cardBlockMapper;
+    private final CardMapper cardMapper;
 
     public CardBlockResponse createBlockRequest(UUID userId, CardBlockRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceDoesNotExistException(UserService.USER_NOT_FOUND));
+
+        if (!user.isEnabled()) {
+            throw new IllegalStateException("Заблокированный пользователь не может блокировать карту");
+        }
+
         Card card = cardRepository.findById(request.cardId())
                 .orElseThrow(() -> new EntityNotFoundException(CardService.CARD_NOT_FOUND));
 
@@ -120,5 +133,27 @@ public class CardBlockService {
         blockRequest.setProcessedBy(adminId);
 
         return cardBlockMapper.toResponse(cardBlockRepository.save(blockRequest));
+    }
+
+    public CardResponse unblockCard(Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(CardService.CARD_NOT_FOUND));
+
+        if (card.getStatus() != CardStatus.BLOCKED) {
+            throw new IllegalStateException("Можно разблокировать только заблокированную карту. Текущий статус: " + card.getStatus());
+        }
+
+        if (card.getExpirationDate().isBefore(java.time.LocalDate.now())) {
+            throw new IllegalStateException("Нельзя разблокировать просроченную карту");
+        }
+
+        card.setStatus(CardStatus.ACTIVE);
+        card.setBlockReason(null);
+        card.setBlockedAt(null);
+        card.setBlockedBy(null);
+
+        Card savedCard = cardRepository.save(card);
+
+        return cardMapper.toResponse(savedCard);
     }
 }

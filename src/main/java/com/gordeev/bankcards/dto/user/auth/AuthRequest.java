@@ -1,4 +1,4 @@
-package com.gordeev.bankcards.dto.user;
+package com.gordeev.bankcards.dto.user.auth;
 
 public record AuthRequest(
         String username,

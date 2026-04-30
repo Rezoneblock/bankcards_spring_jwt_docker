@@ -1,0 +1,940 @@
+openapi: 3.0.3
+info:
+  title: Bank Cards API
+  description: |
+    API для управления банковскими картами.
+    
+    ## Возможности:
+    * Регистрация и аутентификация пользователей
+    * Управление картами (создание, просмотр, блокировка, разблокировка)
+    * Переводы между своими картами
+    * Администрирование пользователей и заявок на блокировку
+    
+    ## Безопасность:
+    * JWT токен для аутентификации
+    * Шифрование номеров карт в БД
+    * Маскирование номеров в ответах
+  version: 1.0.0
+  contact:
+    name: Gordeev Timur
+    email: trew.tr2019@yandex.ru
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Development server
+  - url: https://api.bankcards.com/api/v1
+    description: Production server
+
+tags:
+  - name: Auth
+    description: Аутентификация и регистрация
+  - name: User Cards
+    description: Операции пользователя с картами
+  - name: Admin Cards
+    description: Администрирование карт
+  - name: Admin Users
+    description: Администрирование пользователей
+  - name: Admin Block Requests
+    description: Управление заявками на блокировку
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT токен, полученный при логине
+
+  schemas:
+    # ==================== API Wrappers ====================
+    ApiResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Успешность операции
+        data:
+          description: Данные ответа (если success = true)
+        error:
+          $ref: '#/components/schemas/ApiError'
+        timestamp:
+          type: string
+          format: date-time
+          description: Время ответа
+      example:
+        success: true
+        data: {}
+        timestamp: "2026-04-30T22:00:00"
+
+    ApiError:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Сообщение об ошибке
+        code:
+          type: string
+          description: Код ошибки
+          enum:
+            - VALIDATION_ERROR
+            - ILLEGAL_STATE
+            - ILLEGAL_ARGUMENT
+            - ENTITY_NOT_FOUND
+            - FORBIDDEN
+            - BAD_AUTH
+        details:
+          type: object
+          additionalProperties:
+            type: string
+          description: Детали ошибки (для валидации)
+      example:
+        message: "Ошибка валидации тела запроса"
+        code: "VALIDATION_ERROR"
+        details:
+          cardId: "ID карты обязателен"
+
+    PageResponse:
+      type: object
+      properties:
+        entities:
+          type: array
+          description: Содержимое страницы
+          items:
+            description: Элементы страницы
+        meta:
+          $ref: '#/components/schemas/PageMetadata'
+      example:
+        entities: []
+        meta:
+          size: 10
+          totalElements: 25
+          totalPages: 3
+          currentPageNumber: 0
+
+    PageMetadata:
+      type: object
+      properties:
+        size:
+          type: integer
+          description: Размер страницы
+        totalElements:
+          type: integer
+          description: Всего элементов
+        totalPages:
+          type: integer
+          description: Всего страниц
+        currentPageNumber:
+          type: integer
+          description: Текущая страница (начиная с 0)
+
+    # ==================== Auth ====================
+    AuthRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Имя пользователя
+          example: john_doe
+        password:
+          type: string
+          format: password
+          description: Пароль
+          example: password123
+      example:
+        username: john_doe
+        password: password123
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT токен для аутентификации
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    # ==================== User ====================
+    UserCreateRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Имя пользователя
+          example: john_doe
+        email:
+          type: string
+          format: email
+          maxLength: 100
+          description: Email пользователя
+          example: john@example.com
+        password:
+          type: string
+          format: password
+          minLength: 6
+          maxLength: 255
+          description: Пароль
+          example: password123
+      example:
+        username: john_doe
+        email: john@example.com
+        password: password123
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID пользователя
+        username:
+          type: string
+          description: Имя пользователя
+        email:
+          type: string
+          description: Email пользователя
+        enabled:
+          type: boolean
+          description: Активен ли пользователь
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+      example:
+        id: "550e8400-e29b-41d4-a716-446655440000"
+        username: john_doe
+        email: john@example.com
+        enabled: true
+        roles:
+          - id: 1
+            name: USER
+
+    Role:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID роли
+        name:
+          type: string
+          description: Название роли
+          enum: [USER, ADMIN]
+      example:
+        id: 1
+        name: USER
+
+    UserStatusUpdateRequest:
+      type: object
+      required:
+        - userId
+        - enabled
+      properties:
+        userId:
+          type: string
+          format: uuid
+          description: ID пользователя
+        enabled:
+          type: boolean
+          description: Статус enabled
+      example:
+        userId: "550e8400-e29b-41d4-a716-446655440000"
+        enabled: false
+
+    # ==================== Card ====================
+    CardCreateRequest:
+      type: object
+      required:
+        - cardNumber
+        - ownerName
+        - initialBalance
+        - userId
+      properties:
+        cardNumber:
+          type: string
+          pattern: "^\\d{16}$"
+          description: Номер карты (16 цифр)
+          example: "1234567812345678"
+        ownerName:
+          type: string
+          pattern: "^[A-Z]+(?: [A-Z]+)+$"
+          maxLength: 100
+          description: Имя владельца (только заглавные латинские буквы)
+          example: "IVANOV IVAN"
+        initialBalance:
+          type: number
+          format: bigdecimal
+          minimum: 0
+          description: Начальный баланс
+          example: 1000.00
+        userId:
+          type: string
+          format: uuid
+          description: ID пользователя
+      example:
+        cardNumber: "1234567812345678"
+        ownerName: "IVANOV IVAN"
+        initialBalance: 1000.00
+        userId: "550e8400-e29b-41d4-a716-446655440000"
+
+    CardResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID карты
+        maskedNumber:
+          type: string
+          description: Маскированный номер карты
+          example: "**** **** **** 3456"
+        ownerName:
+          type: string
+          description: Имя владельца
+          example: "IVANOV IVAN"
+        expirationDate:
+          type: string
+          format: date
+          description: Дата истечения срока действия
+          example: "2031-04-30"
+        blockReason:
+          type: string
+          nullable: true
+          description: Причина блокировки
+        balance:
+          type: number
+          format: bigdecimal
+          description: Баланс
+          example: 1000.00
+        status:
+          type: string
+          enum: [ACTIVE, BLOCKED, EXPIRED]
+          description: Статус карты
+        userId:
+          type: string
+          format: uuid
+          description: ID владельца
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата обновления
+      example:
+        id: 1
+        maskedNumber: "**** **** **** 3456"
+        ownerName: "IVANOV IVAN"
+        expirationDate: "2031-04-30"
+        blockReason: null
+        balance: 1000.00
+        status: "ACTIVE"
+        userId: "550e8400-e29b-41d4-a716-446655440000"
+        createdAt: "2026-04-30T18:30:00Z"
+        updatedAt: "2026-04-30T18:30:00Z"
+
+    CardTransferRequest:
+      type: object
+      required:
+        - fromCardId
+        - toCardId
+        - amount
+      properties:
+        fromCardId:
+          type: integer
+          description: ID карты отправителя
+        toCardId:
+          type: integer
+          description: ID карты получателя
+        amount:
+          type: number
+          format: bigdecimal
+          exclusiveMinimum: 0
+          description: Сумма перевода
+      example:
+        fromCardId: 1
+        toCardId: 2
+        amount: 500.00
+
+    CardTransferResponse:
+      type: object
+      properties:
+        fromCardId:
+          type: integer
+        fromCardMasked:
+          type: string
+          description: Маскированный номер карты отправителя
+        toCardId:
+          type: integer
+        toCardMasked:
+          type: string
+          description: Маскированный номер карты получателя
+        amount:
+          type: number
+          format: bigdecimal
+        fromCardNewBalance:
+          type: number
+          format: bigdecimal
+          description: Новый баланс отправителя
+        toCardNewBalance:
+          type: number
+          format: bigdecimal
+          description: Новый баланс получателя
+        transferredAt:
+          type: string
+          format: date-time
+      example:
+        fromCardId: 1
+        fromCardMasked: "**** **** **** 3456"
+        toCardId: 2
+        toCardMasked: "**** **** **** 1234"
+        amount: 500.00
+        fromCardNewBalance: 500.00
+        toCardNewBalance: 1500.00
+        transferredAt: "2026-04-30T22:00:00Z"
+
+    # ==================== Card Block ====================
+    CardBlockRequest:
+      type: object
+      required:
+        - cardId
+      properties:
+        cardId:
+          type: integer
+          description: ID карты для блокировки
+        reason:
+          type: string
+          description: Причина блокировки
+      example:
+        cardId: 1
+        reason: "Карта утеряна"
+
+    CardBlockResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID заявки
+        userId:
+          type: string
+          format: uuid
+          description: ID пользователя
+        cardId:
+          type: integer
+          description: ID карты
+        maskedNumber:
+          type: string
+          description: Маскированный номер карты
+        reason:
+          type: string
+          description: Причина блокировки
+        rejectReason:
+          type: string
+          nullable: true
+          description: Причина отклонения
+        status:
+          $ref: '#/components/schemas/BlockRequestStatus'
+        requestedAt:
+          type: string
+          format: date-time
+          description: Время создания заявки
+        processedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Время обработки заявки
+      example:
+        id: 1
+        userId: "550e8400-e29b-41d4-a716-446655440000"
+        cardId: 1
+        maskedNumber: "**** **** **** 3456"
+        reason: "Карта утеряна"
+        rejectReason: null
+        status: "PENDING"
+        requestedAt: "2026-04-30T18:30:00Z"
+        processedAt: null
+
+    CardBlockDecisionRequest:
+      type: object
+      required:
+        - requestId
+        - action
+      properties:
+        requestId:
+          type: integer
+          description: ID заявки
+        action:
+          $ref: '#/components/schemas/BlockRequestStatus'
+        rejectReason:
+          type: string
+          description: Причина отклонения (обязательно для REJECTED)
+      example:
+        requestId: 1
+        action: "APPROVED"
+        rejectReason: null
+
+    CardUnblockRequest:
+      type: object
+      required:
+        - cardId
+      properties:
+        cardId:
+          type: integer
+          description: ID карты для разблокировки
+      example:
+        cardId: 1
+
+    # ==================== Enums ====================
+    BlockRequestStatus:
+      type: string
+      enum:
+        - PENDING
+        - APPROVED
+        - REJECTED
+      description: Статус заявки на блокировку
+
+    CardStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - BLOCKED
+        - EXPIRED
+      description: Статус карты
+
+# ==================== Paths ====================
+paths:
+  # ==================== Auth ====================
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Регистрация нового пользователя
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '200':
+          description: Успешная регистрация
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Аутентификация пользователя
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  # ==================== User Operations ====================
+  /user:
+    get:
+      tags:
+        - User Cards
+      summary: Получить карты текущего пользователя
+      operationId: getUserCards
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cardId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID карты (если указан - возвращает одну карту)
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 3
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "id,asc"
+      responses:
+        '200':
+          description: Список карт
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageResponse'
+
+  /user/block:
+    post:
+      tags:
+        - User Cards
+      summary: Создать заявку на блокировку карты
+      operationId: createBlockRequest
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardBlockRequest'
+      responses:
+        '200':
+          description: Заявка создана
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CardBlockResponse'
+
+  /user/transfer:
+    post:
+      tags:
+        - User Cards
+      summary: Перевод между своими картами
+      operationId: transfer
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardTransferRequest'
+      responses:
+        '200':
+          description: Перевод выполнен
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CardTransferResponse'
+        '400':
+          description: Ошибка (недостаточно средств, карта заблокирована и т.д.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  # ==================== Admin Users ====================
+  /admin/users:
+    get:
+      tags:
+        - Admin Users
+      summary: Получить список всех пользователей (админ)
+      operationId: getAllUsers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 3
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageResponse'
+
+  /admin/users/block:
+    patch:
+      tags:
+        - Admin Users
+      summary: Блокировка/разблокировка пользователя (админ)
+      operationId: updateUserStatus
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserStatusUpdateRequest'
+      responses:
+        '200':
+          description: Статус обновлен
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+
+  # ==================== Admin Cards ====================
+  /admin/cards:
+    get:
+      tags:
+        - Admin Cards
+      summary: Получить все карты (админ)
+      operationId: adminGetCards
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по пользователю
+        - name: cardId
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: ID конкретной карты
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 3
+      responses:
+        '200':
+          description: Список карт
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageResponse'
+
+    post:
+      tags:
+        - Admin Cards
+      summary: Создать карту (админ)
+      operationId: adminCreateCard
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCreateRequest'
+      responses:
+        '200':
+          description: Карта создана
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CardResponse'
+
+  /admin/cards/block:
+    get:
+      tags:
+        - Admin Block Requests
+      summary: Получить заявки на блокировку (админ)
+      operationId: getBlockRequests
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/BlockRequestStatus'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 3
+      responses:
+        '200':
+          description: Список заявок
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/PageResponse'
+
+  /admin/cards/block/card:
+    patch:
+      tags:
+        - Admin Block Requests
+      summary: Одобрить/отклонить заявку на блокировку (админ)
+      operationId: processBlockRequest
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardBlockDecisionRequest'
+      responses:
+        '200':
+          description: Заявка обработана
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CardBlockResponse'
+
+  /admin/cards/unblock:
+    post:
+      tags:
+        - Admin Cards
+      summary: Разблокировать карту (админ)
+      operationId: unblockCard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cardId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Карта разблокирована
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/CardResponse'
+
+  /admin/cards/delete:
+    delete:
+      tags:
+        - Admin Cards
+      summary: Удалить карту (админ)
+      operationId: deleteCard
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cardId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Карта удалена
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: string
+                        example: "Карта успешно удалена"

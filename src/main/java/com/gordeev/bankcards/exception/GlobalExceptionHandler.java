@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -88,5 +89,29 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(error));
+    }
+
+    // Обработка отсутствия обязательного параметра запроса
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameter(
+            MissingServletRequestParameterException ex) {
+
+        String message = String.format("Отсутствует обязательный параметр: %s (тип: %s)",
+                ex.getParameterName(),
+                ex.getParameterType());
+
+        Map<String, String> details = Map.of(
+                "parameter", ex.getParameterName(),
+                "type", ex.getParameterType(),
+                "required", "true"
+        );
+
+        ApiError error = new ApiError(
+                message,
+                "MISSING_PARAMETER",
+                details
+        );
+
+        return ResponseEntity.badRequest().body(ApiResponse.error(error));
     }
 }

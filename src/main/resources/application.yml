@@ -5,6 +5,10 @@
 #  - Указать порт приложения.
 #  - Настроить параметры безопасности и JWT.
 #  - Включить Swagger UI.
+springdoc:
+  swagger-ui:
+    url: /docs/openapi.yaml
+
 server:
   port: 8080
 

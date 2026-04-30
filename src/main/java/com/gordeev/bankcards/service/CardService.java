@@ -6,11 +6,13 @@ import com.gordeev.bankcards.dto.card.CardResponse;
 import com.gordeev.bankcards.dto.card.CardTransferRequest;
 import com.gordeev.bankcards.dto.card.CardTransferResponse;
 import com.gordeev.bankcards.entity.Card;
+import com.gordeev.bankcards.entity.CardBlock;
 import com.gordeev.bankcards.entity.User;
 import com.gordeev.bankcards.enums.CardStatus;
 import com.gordeev.bankcards.exception.ResourceAlreadyExistException;
 import com.gordeev.bankcards.exception.ResourceDoesNotExistException;
 import com.gordeev.bankcards.mapper.CardMapper;
+import com.gordeev.bankcards.repository.CardBlockRepository;
 import com.gordeev.bankcards.repository.CardRepository;
 import com.gordeev.bankcards.repository.UserRepository;
 import com.gordeev.bankcards.util.CardEncryptionService;
@@ -36,12 +38,12 @@ public class CardService {
     public static final String CARD_ALREADY_EXISTS = "Карта уже существует";
 
     private final CardRepository cardRepository;
+    private final CardBlockRepository cardBlockRepository;
     private final UserRepository userRepository;
     private final CardMapper cardMapper;
 
     private final CardEncryptionService cardEncryptionService;
     private final CardHashSearchService cardHashSearchService;
-    private final MaskCardNumber maskCardNumber;
 
     @Transactional(readOnly = true)
     public PageResponse<CardResponse> getCards(UUID userId, Pageable pageable, Long cardId) {
@@ -114,6 +116,13 @@ public class CardService {
     }
 
     public CardTransferResponse transferBetweenCards(UUID userId, CardTransferRequest request) {
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceDoesNotExistException(UserService.USER_NOT_FOUND));
+
+        if (!user.isEnabled()) {
+            throw new IllegalStateException("Заблокированный пользователь не может переводить деньги");
+        }
+
         Card fromCard = cardRepository.findById(request.fromCardId())
                 .orElseThrow(() -> new ResourceDoesNotExistException("Карта отправителя не найдена"));
 
@@ -173,5 +182,25 @@ public class CardService {
         if (card.getExpirationDate().isBefore(java.time.LocalDate.now())) {
             throw new IllegalStateException("Срок действия карты " + cardType + " истек");
         }
+    }
+
+    public void deleteCard (Long cardId) {
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceDoesNotExistException(CARD_NOT_FOUND));
+
+        if (card.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+            throw new IllegalStateException("Нельзя удалить карту с ненулевым балансом. Баланс: " + card.getBalance());
+        }
+
+        if (card.getStatus() == CardStatus.ACTIVE) {
+            throw new IllegalStateException("Нельзя удалить активную карту. Сначала заблокируйте её");
+        }
+
+        List<CardBlock> blockRequests = cardBlockRepository.findByCardId(cardId);
+        if (!blockRequests.isEmpty()) {
+            cardBlockRepository.deleteAll(blockRequests);
+        }
+
+        cardRepository.delete(card);
     }
 }

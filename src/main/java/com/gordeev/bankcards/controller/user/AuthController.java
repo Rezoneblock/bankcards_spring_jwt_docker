@@ -2,8 +2,8 @@ package com.gordeev.bankcards.controller.user;
 
 import com.gordeev.bankcards.dto.api.ApiError;
 import com.gordeev.bankcards.dto.api.ApiResponse;
-import com.gordeev.bankcards.dto.user.AuthRequest;
-import com.gordeev.bankcards.dto.user.AuthResponse;
+import com.gordeev.bankcards.dto.user.auth.AuthRequest;
+import com.gordeev.bankcards.dto.user.auth.AuthResponse;
 import com.gordeev.bankcards.dto.user.UserCreateRequest;
 import com.gordeev.bankcards.dto.user.UserResponse;
 import com.gordeev.bankcards.security.jwt.JwtService;

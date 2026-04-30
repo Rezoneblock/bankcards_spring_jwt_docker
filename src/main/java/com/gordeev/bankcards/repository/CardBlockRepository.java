@@ -6,10 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.UUID;
+import java.util.List;
 
 public interface CardBlockRepository extends JpaRepository<CardBlock, Long> {
-    Page<CardBlock> findByUserId(UUID userId, Pageable pageable);
+    List<CardBlock> findByCardId(Long cardId);
 
     Page<CardBlock> findByStatus(BlockRequestStatus status, Pageable pageable);
 
