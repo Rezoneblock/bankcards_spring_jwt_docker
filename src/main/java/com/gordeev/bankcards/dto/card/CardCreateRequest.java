@@ -8,9 +8,8 @@ import java.util.UUID;
 
 public record CardCreateRequest(
         @NotBlank @Pattern(regexp = "\\d{16}", message = "Номер карты должен содержать 16 цифр") String cardNumber,
-        @NotBlank @Size(max = 150) String ownerName,
-        @NotNull @Pattern(regexp = "\\d{2}/\\d{2}", message = "Формат срока действия: mm/yy") LocalDate expirationDate,
-        @NotNull @Positive BigDecimal initialBalance,
+        @NotBlank @Pattern(regexp = "^[A-Z]+(?: [A-Z]+)+$", message = "Имя владельца должно быть формата: IVANOV IVAN") @Size(max = 100) String ownerName,
+        @NotNull @PositiveOrZero BigDecimal initialBalance,
         @NotNull UUID userId
         ) {
 }

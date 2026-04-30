@@ -32,7 +32,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private Boolean enabled = true;
+    private boolean enabled = true;
 
     @CreationTimestamp
     @Column(name = "created_at", columnDefinition = "TIMESTAMP WITH TIME ZONE")

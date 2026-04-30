@@ -23,8 +23,8 @@ public class Card {
     @Column(name = "card_number", nullable = false, unique = true)
     private String cardNumber;
 
-    @Column(name = "masked_number", nullable = false, length = 19)
-    private String maskedNumber;
+    @Column(name = "card_hash_number", nullable = false, unique = true)
+    private String cardHashNumber;
 
     @Column(name = "last_four_digits", nullable = false, length = 4)
     private String lastFourDigits;

@@ -8,11 +8,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface CardRepository extends JpaRepository<Card,Long> {
-    Page<Card> findByUser(User user, Pageable pageable);
+    Page<Card> findByUserId(UUID id, Pageable pageable);
     Optional<Card> findByIdAndUser(Long cardId, User user);
     boolean existsByCardNumber(String encryptedCardNumber);
+    boolean existsByCardHashNumber(String cardHash);
     Optional<Card> findByCardNumber(String encryptedCardNumber);
 }

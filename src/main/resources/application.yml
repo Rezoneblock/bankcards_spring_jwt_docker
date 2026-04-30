@@ -39,4 +39,9 @@ app:
     username: admin
     password: ultraPassword
     email: admin@company.com
+
+card:
+  encryption:
+    password: anotherUltraPassword
+    salt: randomSaltForCardsTable12356
 # ! Для удобства проверяющего пишу это здесь, а не в env переменной !
