@@ -5294,3 +5294,82 @@ and any local or remote base of the path set on the search path.
 2026-04-30T22:44:01.303Z  INFO 1 --- [bankcards] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2026-04-30T22:44:01.309Z  INFO 1 --- [bankcards] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 2026-04-30T22:44:01.315Z  INFO 1 --- [bankcards] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2026-04-30T22:46:30.725Z  INFO 1 --- [bankcards] [main] c.g.bankcards.BankcardsApplication       : Starting BankcardsApplication v0.0.1-SNAPSHOT using Java 21.0.10 with PID 1 (/app/app.jar started by appuser in /app)
+2026-04-30T22:46:30.729Z  INFO 1 --- [bankcards] [main] c.g.bankcards.BankcardsApplication       : The following 1 profile is active: "docker"
+2026-04-30T22:46:31.623Z  INFO 1 --- [bankcards] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-30T22:46:31.684Z  INFO 1 --- [bankcards] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 49 ms. Found 4 JPA repository interfaces.
+2026-04-30T22:46:32.314Z  INFO 1 --- [bankcards] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-04-30T22:46:32.335Z  INFO 1 --- [bankcards] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-30T22:46:32.336Z  INFO 1 --- [bankcards] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.31]
+2026-04-30T22:46:32.380Z  INFO 1 --- [bankcards] [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-04-30T22:46:32.380Z  INFO 1 --- [bankcards] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1606 ms
+2026-04-30T22:46:32.560Z  INFO 1 --- [bankcards] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-30T22:46:32.754Z  INFO 1 --- [bankcards] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3a109ff7
+2026-04-30T22:46:32.756Z  INFO 1 --- [bankcards] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-30T22:46:33.032Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/001-initial-schema.sql
+2026-04-30T22:46:33.037Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/002-insert-roles.sql
+2026-04-30T22:46:33.039Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/003-initial-indexes.sql
+2026-04-30T22:46:33.040Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/004-update-role-names.sql
+2026-04-30T22:46:33.041Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/005-create-lastfourdigits-card-column.sql
+2026-04-30T22:46:33.042Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/006-remove-masked-number-from-cards.sql
+2026-04-30T22:46:33.043Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/007-add-card-hash-column.sql
+2026-04-30T22:46:33.045Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/008-create-card-block-requests-table.sql
+2026-04-30T22:46:33.046Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/009-add-card-block-field.sql
+2026-04-30T22:46:33.047Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading resource: db/migration/2026/010-add-card-block-reject-reason.sql
+2026-04-30T22:46:33.086Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Creating database history table with name: public.databasechangelog
+2026-04-30T22:46:33.176Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading from public.databasechangelog
+2026-04-30T22:46:33.239Z  INFO 1 --- [bankcards] [main] liquibase.lockservice                    : Successfully acquired change log lock
+2026-04-30T22:46:33.241Z  INFO 1 --- [bankcards] [main] liquibase.command                        : Using deploymentId: 7589193241
+2026-04-30T22:46:33.243Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Reading from public.databasechangelog
+2026-04-30T22:46:33.250Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/001-initial-schema.sql::raw::includeAll
+2026-04-30T22:46:33.338Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.342Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/001-initial-schema.sql::raw::includeAll ran successfully in 90ms
+2026-04-30T22:46:33.349Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/002-insert-roles.sql::raw::includeAll
+2026-04-30T22:46:33.352Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.356Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/002-insert-roles.sql::raw::includeAll ran successfully in 6ms
+2026-04-30T22:46:33.361Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/003-initial-indexes.sql::raw::includeAll
+2026-04-30T22:46:33.391Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.394Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/003-initial-indexes.sql::raw::includeAll ran successfully in 32ms
+2026-04-30T22:46:33.401Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/004-update-role-names.sql::raw::includeAll
+2026-04-30T22:46:33.404Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.409Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/004-update-role-names.sql::raw::includeAll ran successfully in 8ms
+2026-04-30T22:46:33.418Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/005-create-lastfourdigits-card-column.sql::raw::includeAll
+2026-04-30T22:46:33.432Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.439Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/005-create-lastfourdigits-card-column.sql::raw::includeAll ran successfully in 19ms
+2026-04-30T22:46:33.445Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/006-remove-masked-number-from-cards.sql::raw::includeAll
+2026-04-30T22:46:33.448Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.452Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/006-remove-masked-number-from-cards.sql::raw::includeAll ran successfully in 6ms
+2026-04-30T22:46:33.461Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/007-add-card-hash-column.sql::raw::includeAll
+2026-04-30T22:46:33.496Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.503Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/007-add-card-hash-column.sql::raw::includeAll ran successfully in 41ms
+2026-04-30T22:46:33.512Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/008-create-card-block-requests-table.sql::raw::includeAll
+2026-04-30T22:46:33.568Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.572Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/008-create-card-block-requests-table.sql::raw::includeAll ran successfully in 57ms
+2026-04-30T22:46:33.579Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/009-add-card-block-field.sql::raw::includeAll
+2026-04-30T22:46:33.585Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.590Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/009-add-card-block-field.sql::raw::includeAll ran successfully in 11ms
+2026-04-30T22:46:33.601Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Running Changeset: db/migration/2026/010-add-card-block-reject-reason.sql::raw::includeAll
+2026-04-30T22:46:33.620Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : Custom SQL executed
+2026-04-30T22:46:33.623Z  INFO 1 --- [bankcards] [main] liquibase.changelog                      : ChangeSet db/migration/2026/010-add-card-block-reject-reason.sql::raw::includeAll ran successfully in 21ms
+2026-04-30T22:46:33.637Z  INFO 1 --- [bankcards] [main] liquibase.util                           : UPDATE SUMMARY
+2026-04-30T22:46:33.637Z  INFO 1 --- [bankcards] [main] liquibase.util                           : Run:                         10
+2026-04-30T22:46:33.638Z  INFO 1 --- [bankcards] [main] liquibase.util                           : Previously run:               0
+2026-04-30T22:46:33.638Z  INFO 1 --- [bankcards] [main] liquibase.util                           : Filtered out:                 0
+2026-04-30T22:46:33.639Z  INFO 1 --- [bankcards] [main] liquibase.util                           : -------------------------------
+2026-04-30T22:46:33.639Z  INFO 1 --- [bankcards] [main] liquibase.util                           : Total change sets:           10
+2026-04-30T22:46:33.640Z  INFO 1 --- [bankcards] [main] liquibase.util                           : Update summary generated
+2026-04-30T22:46:33.642Z  INFO 1 --- [bankcards] [main] liquibase.command                        : Update command completed successfully.
+2026-04-30T22:46:33.642Z  INFO 1 --- [bankcards] [main] liquibase.ui                             : Liquibase: Update has been successful. Rows affected: 16
+2026-04-30T22:46:33.647Z  INFO 1 --- [bankcards] [main] liquibase.lockservice                    : Successfully released change log lock
+2026-04-30T22:46:33.648Z  INFO 1 --- [bankcards] [main] liquibase.command                        : Command execution complete
+2026-04-30T22:46:33.731Z  INFO 1 --- [bankcards] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-30T22:46:33.814Z  INFO 1 --- [bankcards] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-04-30T22:46:33.856Z  INFO 1 --- [bankcards] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-04-30T22:46:34.137Z  INFO 1 --- [bankcards] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-30T22:46:34.187Z  WARN 1 --- [bankcards] [main] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-04-30T22:46:34.958Z  INFO 1 --- [bankcards] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-30T22:46:34.994Z  INFO 1 --- [bankcards] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-30T22:46:35.306Z  INFO 1 --- [bankcards] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-04-30T22:46:35.509Z  WARN 1 --- [bankcards] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-30T22:46:36.004Z  INFO 1 --- [bankcards] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-04-30T22:46:36.010Z  INFO 1 --- [bankcards] [main] c.g.bankcards.BankcardsApplication       : Started BankcardsApplication in 5.843 seconds (process running for 6.431)
