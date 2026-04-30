@@ -1,4 +1,4 @@
-package com.gordeev.bankcards.dto.card;
+package com.gordeev.bankcards.dto.card.block;
 
 import com.gordeev.bankcards.enums.BlockRequestStatus;
 import jakarta.validation.constraints.NotNull;

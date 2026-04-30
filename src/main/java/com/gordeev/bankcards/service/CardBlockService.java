@@ -1,9 +1,9 @@
 package com.gordeev.bankcards.service;
 
 import com.gordeev.bankcards.dto.api.PageResponse;
-import com.gordeev.bankcards.dto.card.CardBlockDecisionRequest;
-import com.gordeev.bankcards.dto.card.CardBlockRequest;
-import com.gordeev.bankcards.dto.card.CardBlockResponse;
+import com.gordeev.bankcards.dto.card.block.CardBlockDecisionRequest;
+import com.gordeev.bankcards.dto.card.block.CardBlockRequest;
+import com.gordeev.bankcards.dto.card.block.CardBlockResponse;
 import com.gordeev.bankcards.entity.Card;
 import com.gordeev.bankcards.entity.CardBlock;
 import com.gordeev.bankcards.enums.BlockRequestStatus;

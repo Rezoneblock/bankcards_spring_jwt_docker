@@ -6,7 +6,7 @@ import com.gordeev.bankcards.dto.user.AuthRequest;
 import com.gordeev.bankcards.dto.user.AuthResponse;
 import com.gordeev.bankcards.dto.user.UserCreateRequest;
 import com.gordeev.bankcards.dto.user.UserResponse;
-import com.gordeev.bankcards.security.JwtService;
+import com.gordeev.bankcards.security.jwt.JwtService;
 import com.gordeev.bankcards.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

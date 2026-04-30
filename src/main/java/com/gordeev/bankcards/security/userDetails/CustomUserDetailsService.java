@@ -1,4 +1,4 @@
-package com.gordeev.bankcards.security;
+package com.gordeev.bankcards.security.userDetails;
 
 import com.gordeev.bankcards.entity.User;
 import com.gordeev.bankcards.repository.UserRepository;

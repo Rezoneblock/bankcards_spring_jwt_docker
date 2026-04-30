@@ -1,6 +1,6 @@
 package com.gordeev.bankcards.mapper;
 
-import com.gordeev.bankcards.dto.card.CardBlockResponse;
+import com.gordeev.bankcards.dto.card.block.CardBlockResponse;
 import com.gordeev.bankcards.entity.CardBlock;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

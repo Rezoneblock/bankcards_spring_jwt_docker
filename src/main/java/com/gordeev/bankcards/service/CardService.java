@@ -2,9 +2,12 @@ package com.gordeev.bankcards.service;
 
 import com.gordeev.bankcards.dto.api.PageResponse;
 import com.gordeev.bankcards.dto.card.CardCreateRequest;
-import com.gordeev.bankcards.dto.card.CardCreateResponse;
+import com.gordeev.bankcards.dto.card.CardResponse;
+import com.gordeev.bankcards.dto.card.CardTransferRequest;
+import com.gordeev.bankcards.dto.card.CardTransferResponse;
 import com.gordeev.bankcards.entity.Card;
 import com.gordeev.bankcards.entity.User;
+import com.gordeev.bankcards.enums.CardStatus;
 import com.gordeev.bankcards.exception.ResourceAlreadyExistException;
 import com.gordeev.bankcards.exception.ResourceDoesNotExistException;
 import com.gordeev.bankcards.mapper.CardMapper;
@@ -12,12 +15,17 @@ import com.gordeev.bankcards.repository.CardRepository;
 import com.gordeev.bankcards.repository.UserRepository;
 import com.gordeev.bankcards.util.CardEncryptionService;
 import com.gordeev.bankcards.util.CardHashSearchService;
+import com.gordeev.bankcards.util.MaskCardNumber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,9 +41,31 @@ public class CardService {
 
     private final CardEncryptionService cardEncryptionService;
     private final CardHashSearchService cardHashSearchService;
+    private final MaskCardNumber maskCardNumber;
 
     @Transactional(readOnly = true)
-    public PageResponse<CardCreateResponse> getCards(UUID userId, Pageable pageable) {
+    public PageResponse<CardResponse> getCards(UUID userId, Pageable pageable, Long cardId) {
+        if (cardId != null) {
+            Card card = cardRepository.findById(cardId)
+                    .orElseThrow(() -> new ResourceDoesNotExistException("Карта не найдена"));
+
+            if (userId != null && !card.getUser().getId().equals(userId)) {
+                throw new AccessDeniedException("Это не ваша карта");
+            }
+
+            CardResponse result = cardMapper.toResponse(card);
+
+            return new PageResponse<>(
+                    List.of(result),
+                    new PageResponse.Metadata(
+                            1,
+                            1,
+                            1,
+                            0
+                    )
+            );
+        }
+
         Page<Card> page;
 
         if (userId != null) {
@@ -47,7 +77,7 @@ public class CardService {
             page = cardRepository.findAll(pageable);
         }
 
-        Page<CardCreateResponse> responsePage = page.map(cardMapper::toResponse);
+        Page<CardResponse> responsePage = page.map(cardMapper::toResponse);
 
         return new PageResponse<>(
                 responsePage.getContent(),
@@ -60,7 +90,7 @@ public class CardService {
         );
     }
 
-    public CardCreateResponse createCard(CardCreateRequest request) {
+    public CardResponse createCard(CardCreateRequest request) {
 
         String cardHash = cardHashSearchService.generateHash(request.cardNumber());
 
@@ -81,5 +111,67 @@ public class CardService {
         card.setCardHashNumber(cardHash);
 
         return cardMapper.toResponse(cardRepository.save(card));
+    }
+
+    public CardTransferResponse transferBetweenCards(UUID userId, CardTransferRequest request) {
+        Card fromCard = cardRepository.findById(request.fromCardId())
+                .orElseThrow(() -> new ResourceDoesNotExistException("Карта отправителя не найдена"));
+
+        Card toCard = cardRepository.findById(request.toCardId())
+                .orElseThrow(() -> new ResourceDoesNotExistException("Карта получателя не найдена"));
+
+        if (!fromCard.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Карта отправителя не принадлежит вам");
+        }
+
+        if (!toCard.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("Карта получателя не принадлежит вам");
+        }
+
+        validateCardForTransfer(fromCard, "отправителя");
+        validateCardForTransfer(toCard, "получателя");
+
+        if (fromCard.getId().equals(toCard.getId())) {
+            throw new IllegalArgumentException("Нельзя перевести деньги на ту же самую карту");
+        }
+
+        BigDecimal amount = request.amount();
+        if (fromCard.getBalance().compareTo(amount) < 0) {
+            throw new IllegalStateException("Недостаточно средств. Доступно: " + fromCard.getBalance());
+        }
+
+        BigDecimal newFromBalance = fromCard.getBalance().subtract(amount);
+        BigDecimal newToBalance = toCard.getBalance().add(amount);
+
+        fromCard.setBalance(newFromBalance);
+        toCard.setBalance(newToBalance);
+
+        cardRepository.save(fromCard);
+        cardRepository.save(toCard);
+
+        return new CardTransferResponse(
+                fromCard.getId(),
+                MaskCardNumber.mask(fromCard.getLastFourDigits()),
+                toCard.getId(),
+                MaskCardNumber.mask(toCard.getLastFourDigits()),
+                amount,
+                newFromBalance,
+                newToBalance,
+                OffsetDateTime.now()
+        );
+    }
+
+    private void validateCardForTransfer(Card card, String cardType) {
+        if (card.getStatus() == CardStatus.BLOCKED) {
+            throw new IllegalStateException("Карта " + cardType + " заблокирована");
+        }
+
+        if (card.getStatus() == CardStatus.EXPIRED) {
+            throw new IllegalStateException("Срок действия карты " + cardType + " истек");
+        }
+
+        if (card.getExpirationDate().isBefore(java.time.LocalDate.now())) {
+            throw new IllegalStateException("Срок действия карты " + cardType + " истек");
+        }
     }
 }

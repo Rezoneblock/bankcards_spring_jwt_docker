@@ -1,4 +1,4 @@
-package com.gordeev.bankcards.security;
+package com.gordeev.bankcards.security.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
