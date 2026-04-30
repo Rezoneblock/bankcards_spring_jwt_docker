@@ -1,9 +1,9 @@
-package com.gordeev.bankcards.controller;
+package com.gordeev.bankcards.controller.admin;
 
 import com.gordeev.bankcards.dto.api.ApiResponse;
 import com.gordeev.bankcards.dto.api.PageResponse;
 import com.gordeev.bankcards.dto.card.CardCreateRequest;
-import com.gordeev.bankcards.dto.card.CardResponse;
+import com.gordeev.bankcards.dto.card.CardCreateResponse;
 import com.gordeev.bankcards.service.CardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,18 +25,18 @@ public class AdminController {
 
     // Поиск карт с пагинацией, можно вытащить только карты конкретного пользователя via UUID
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<CardResponse>>> getCards(
+    public ResponseEntity<ApiResponse<PageResponse<CardCreateResponse>>> getCards(
             @RequestParam(required = false) UUID userId,
             @PageableDefault(size = 3, sort = "id", direction = Sort.Direction.ASC) Pageable pageable
             ) {
-        PageResponse<CardResponse> result = cardService.getCards(userId, pageable);
+        PageResponse<CardCreateResponse> result = cardService.getCards(userId, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CardResponse>> createCard(@RequestBody @Valid CardCreateRequest request) {
-        CardResponse result = cardService.createCard(request);
+    public ResponseEntity<ApiResponse<CardCreateResponse>> createCard(@RequestBody @Valid CardCreateRequest request) {
+        CardCreateResponse result = cardService.createCard(request);
 
         return ResponseEntity.ok(ApiResponse.success(result));
     }

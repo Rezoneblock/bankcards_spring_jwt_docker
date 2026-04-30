@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "cards")
@@ -37,6 +38,15 @@ public class Card {
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
+
+    @Column(name = "block_reason", length = 255)
+    private String blockReason;
+
+    @Column(name = "blocked_at")
+    private OffsetDateTime blockedAt;
+
+    @Column(name = "blocked_by")
+    private UUID blockedBy;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)

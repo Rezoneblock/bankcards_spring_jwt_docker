@@ -1,4 +1,4 @@
-package com.gordeev.bankcards.controller;
+package com.gordeev.bankcards.controller.user;
 
 import com.gordeev.bankcards.dto.api.ApiError;
 import com.gordeev.bankcards.dto.api.ApiResponse;

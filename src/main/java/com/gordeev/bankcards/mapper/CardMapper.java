@@ -1,7 +1,7 @@
 package com.gordeev.bankcards.mapper;
 
 import com.gordeev.bankcards.dto.card.CardCreateRequest;
-import com.gordeev.bankcards.dto.card.CardResponse;
+import com.gordeev.bankcards.dto.card.CardCreateResponse;
 import com.gordeev.bankcards.entity.Card;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -26,7 +26,7 @@ public interface CardMapper {
     // Из entity в dto
     @Mapping(target = "maskedNumber", source = "lastFourDigits", qualifiedByName = "maskCardNumber")
     @Mapping(target = "userId", source = "user.id")
-    CardResponse toResponse(Card card);
+    CardCreateResponse toResponse(Card card);
 
 
     // Вытягиваем последние 4 цифры карты

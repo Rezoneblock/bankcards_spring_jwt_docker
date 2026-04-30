@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-public record CardResponse(
+public record CardCreateResponse(
         Long id,
         String maskedNumber,
         String ownerName,

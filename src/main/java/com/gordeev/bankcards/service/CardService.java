@@ -2,7 +2,7 @@ package com.gordeev.bankcards.service;
 
 import com.gordeev.bankcards.dto.api.PageResponse;
 import com.gordeev.bankcards.dto.card.CardCreateRequest;
-import com.gordeev.bankcards.dto.card.CardResponse;
+import com.gordeev.bankcards.dto.card.CardCreateResponse;
 import com.gordeev.bankcards.entity.Card;
 import com.gordeev.bankcards.entity.User;
 import com.gordeev.bankcards.exception.ResourceAlreadyExistException;
@@ -35,7 +35,7 @@ public class CardService {
     private final CardHashSearchService cardHashSearchService;
 
     @Transactional(readOnly = true)
-    public PageResponse<CardResponse> getCards(UUID userId, Pageable pageable) {
+    public PageResponse<CardCreateResponse> getCards(UUID userId, Pageable pageable) {
         Page<Card> page;
 
         if (userId != null) {
@@ -47,7 +47,7 @@ public class CardService {
             page = cardRepository.findAll(pageable);
         }
 
-        Page<CardResponse> responsePage = page.map(cardMapper::toResponse);
+        Page<CardCreateResponse> responsePage = page.map(cardMapper::toResponse);
 
         return new PageResponse<>(
                 responsePage.getContent(),
@@ -60,7 +60,7 @@ public class CardService {
         );
     }
 
-    public CardResponse createCard(CardCreateRequest request) {
+    public CardCreateResponse createCard(CardCreateRequest request) {
 
         String cardHash = cardHashSearchService.generateHash(request.cardNumber());
 
