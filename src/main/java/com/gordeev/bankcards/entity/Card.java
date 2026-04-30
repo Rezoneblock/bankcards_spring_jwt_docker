@@ -1,5 +1,6 @@
 package com.gordeev.bankcards.entity;
 
+import com.gordeev.bankcards.enums.CardStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,9 @@ public class Card {
     @Column(name = "masked_number", nullable = false, length = 19)
     private String maskedNumber;
 
+    @Column(name = "last_four_digits", nullable = false, length = 4)
+    private String lastFourDigits;
+
     @Column(name = "owner_name", nullable = false, length = 100)
     private String ownerName;
 
@@ -34,8 +38,9 @@ public class Card {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
-    private String status = "ACTIVE";
+    private CardStatus status = CardStatus.ACTIVE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Set;
 
-// ! Для удобства проверяющего создаю админа при запуске !
+// ! Для удобства проверяющего создаю админа при запуске приложения !
 
 @Component
 @RequiredArgsConstructor
