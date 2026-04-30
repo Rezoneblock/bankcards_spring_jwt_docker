@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface CardBlockRepository extends JpaRepository<CardBlock, Long> {
-    Page<CardBlock> findAllByUserId(UUID userId, Pageable pageable);
+    Page<CardBlock> findByUserId(UUID userId, Pageable pageable);
 
-    Page<CardBlock> findAllByStatus(BlockRequestStatus status, Pageable pageable);
+    Page<CardBlock> findByStatus(BlockRequestStatus status, Pageable pageable);
 
     boolean existsByCardIdAndStatus(Long cardId, BlockRequestStatus status);
 }

@@ -9,6 +9,7 @@ import org.mapstruct.Named;
 @Mapper(componentModel = "spring")
 public interface CardBlockMapper {
     @Mapping(target = "cardId", source = "card.id")
+    @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "maskedNumber", source = "card.lastFourDigits", qualifiedByName = "maskCardNumber")
     CardBlockResponse toResponse(CardBlock entity);
 

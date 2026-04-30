@@ -3,7 +3,7 @@ package com.gordeev.bankcards.dto.api;
 import java.util.List;
 
 public record PageResponse<T>(
-        List<T> data,
+        List<T> entities,
 
         Metadata meta
 ) {

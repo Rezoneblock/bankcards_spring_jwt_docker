@@ -2,7 +2,9 @@ package com.gordeev.bankcards.exception;
 
 import com.gordeev.bankcards.dto.api.ApiError;
 import com.gordeev.bankcards.dto.api.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,7 +16,49 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Валидация
+    // Обработка IllegalArgumentException
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgument(IllegalArgumentException ex) {
+        ApiError error = new ApiError(
+                ex.getMessage(),
+                "ILLEGAL_ARGUMENT",
+                null
+        );
+
+        return ResponseEntity.badRequest().body(ApiResponse.error(error));
+    }
+
+    // Обработка IllegalStateException
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalState(IllegalStateException ex) {
+        ApiError error = new ApiError(
+                ex.getMessage(),
+                "ILLEGAL_STATE",
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(error));
+    }
+
+    // Обработка ошибки тела запроса
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+        String message = "Тело запроса отсутствует или имеет неверный формат";
+
+        if (ex.getMessage() != null && ex.getMessage().contains("Required request body is missing")) {
+            message = "Тело запроса обязательно для этого endpoint";
+        }
+
+        ApiError error = new ApiError(
+                message,
+                "REQUEST_BODY_MISSING",
+                null
+        );
+
+        return ResponseEntity.badRequest().body(ApiResponse.error(error));
+    }
+
+    // Валидация запросов
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -34,7 +78,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(ApiResponse.error(error));
     }
 
-    // Кастомные исключения
+    // Моё кастомное исключение (businessException)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiResponse<Void>> businessHandler(BusinessException ex) {
         ApiError error = new ApiError(
