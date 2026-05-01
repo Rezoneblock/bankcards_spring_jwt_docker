@@ -59,6 +59,14 @@ Backend-приложение для управления банковскими 
 
 ### `` docker-compose up -d ``
 
+## ✨ После запуска
+
+📚 Swagger UI	http://localhost:8080/swagger-ui/index.html
+
+🐘 pgAdmin	http://localhost:5050
+
+🔐 API	http://localhost:8080
+
 ### ! Логин и пароль от БД хранятся в application-docker.yml (читай ниже) !
 ### ! Логин и пароль от pgAdmin хранятся в docker-compose.yml (читай ниже) !
 
