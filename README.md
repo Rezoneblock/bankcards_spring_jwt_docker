@@ -59,6 +59,9 @@ Backend-приложение для управления банковскими 
 
 ### `` docker-compose up -d ``
 
+### ! Логин и пароль от БД хранятся в application-docker.yml (читай ниже) !
+### ! Логин и пароль от pgAdmin хранятся в docker-compose.yml (читай ниже) !
+
 ### Требования
 - Docker & Docker Compose
 - Port 8080, 5432, 5050 свободны
